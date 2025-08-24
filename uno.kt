@@ -142,7 +142,11 @@ class Player(
          }
        }
        is Turn.PlayWildcard -> {
-         // no validation needed
+         if (mustDraw != null) {
+           require(turn.card is UnoCard.Draw4) {
+             "Draw 4 card required"
+           }
+         }
        }
        is Turn.Draw -> {
          require(
@@ -330,6 +334,7 @@ class UnoGame(
   }
 }
 
+class RandomPlayer
 
 fun main() {
   val deck = UnoDeck()
