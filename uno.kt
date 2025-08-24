@@ -334,14 +334,26 @@ class UnoGame(
   }
 }
 
-class RandomStrategy : Strategy {
+class DumbStrategy : Strategy {
   override fun turn(
     hand: List<UnoCard>,
     lastCard: UnoCard,
     rotation: Rotation,
     color: UnoColor,
     mustDraw: MustDraw?,
-  ): Turn {}
+  ): Turn {
+    val card = hand.firstOrNull {
+      when(it) {
+        is UnoCard.Colored -> it.color == color
+        is UnoCard.Wildcard -> true
+      }
+    }
+    return when(card) {
+      is UnoCard.Colored -> Turn.Play(card)
+      is UnoCard.Wildcard -> Turn.PlayWildcard(card)
+      else -> Turn.Draw
+    }
+  }
 }
 
 fun main() {
