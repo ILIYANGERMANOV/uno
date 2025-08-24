@@ -334,7 +334,15 @@ class UnoGame(
   }
 }
 
-class RandomPlayer
+class RandomStrategy : Strategy {
+  override fun turn(
+    hand: List<UnoCard>,
+    lastCard: UnoCard,
+    rotation: Rotation,
+    color: UnoColor,
+    mustDraw: MustDraw?,
+  ): Turn {}
+}
 
 fun main() {
   val deck = UnoDeck()
