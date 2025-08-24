@@ -357,8 +357,13 @@ class DumbStrategy : Strategy {
 }
 
 fun main() {
-  val deck = UnoDeck()
-  println(deck)
-  println(deck.draw())
-  println(deck)
+  val game = UnoGame(
+    players = listOf(
+      Player("p1", DumbStrategy()),
+      Player("p2", DumbStrategy()),
+      Player("p3", DumbStrategy()),
+      Player("p4", DumbStrategy()),
+    )
+  )
+  game.play()
 }
