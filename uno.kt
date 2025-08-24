@@ -248,7 +248,7 @@ class UnoGame(
     color = firstCard.color
   }
   
-  fun play() {
+  fun play(): String {
     while(players.all { it.hand.isNotEmpty() }) {
       val player = players[turn]
       val turn = player.turn(
@@ -309,6 +309,7 @@ class UnoGame(
     }
     val winner = players.first { it.hand.isEmpty() }
     println(winner.name)
+    return winner.name
   }
   
   private fun nextTurn() {
@@ -350,20 +351,31 @@ class DumbStrategy : Strategy {
     }
     return when(card) {
       is UnoCard.Colored -> Turn.Play(card)
-      is UnoCard.Wildcard -> Turn.PlayWildcard(card)
+      is UnoCard.Wildcard -> Turn.PlayWildcard(card, color)
       else -> Turn.Draw
     }
   }
 }
 
 fun main() {
-  val game = UnoGame(
-    players = listOf(
-      Player("p1", DumbStrategy()),
-      Player("p2", DumbStrategy()),
-      Player("p3", DumbStrategy()),
-      Player("p4", DumbStrategy()),
-    )
+  val wins = mutableMapOf(
+    "p1" to 0,
+    "p2" to 0,
+    "p3" to 0,
+    "p4" to 0,
   )
-  game.play()
+  repeat(1000) {
+    val game = UnoGame(
+      players = listOf(
+        Player("p1", DumbStrategy()),
+        Player("p2", DumbStrategy()),
+        Player("p3", DumbStrategy()),
+        Player("p4", DumbStrategy()),
+      )
+    )
+  
+    val w = game.play()
+    wins[w] = wins[w]!! + 1
+  }
+  println(wins)
 }
