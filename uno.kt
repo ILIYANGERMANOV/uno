@@ -222,7 +222,7 @@ class UnoGame(
   private var turn = 0
   private var turnCount = 0
   private var rotation = Rotation.Clockwise
-  private val deck = UnoDeck()
+  private var deck = UnoDeck()
   private val played = UnoDeck(empty = true)
   private lateinit var color: UnoColor
   private var mustDraw: MustDraw? = null
@@ -293,7 +293,8 @@ class UnoGame(
         is Turn.Draw -> {
           repeat(mustDraw?.cards ?: 1) {
             if (deck.isEmpty()) {
-              // todo
+              deck = played
+              deck.draw() // discard top
             }
             player.draw(deck.draw())
           }
