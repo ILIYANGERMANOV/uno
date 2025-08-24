@@ -291,7 +291,12 @@ class UnoGame(
            }
         }
         is Turn.Draw -> {
-            // TODO
+          repeat(mustDraw?.cards ?: 1) {
+            if (deck.isEmpty()) {
+              // todo
+            }
+            player.draw(deck.draw())
+          }
         }
       }
       turns.add(player.name to turn)
