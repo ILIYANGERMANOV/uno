@@ -173,7 +173,7 @@ class Player(
           lastCard is UnoCard.Number &&
           card.n == lastCard.n
         ) return true
-     // Same type
+     // Special same type
      if (card is UnoCard.Reverse && 
           lastCard is UnoCard.Reverse) return true
      if (card is UnoCard.Skip && 
@@ -232,7 +232,8 @@ class UnoGame(
   private var mustDraw: MustDraw? = null
     
   // History
-  private val turns = mutableListOf<Pair<String, Turn>>()
+  private val _turns = mutableListOf<Pair<String, Turn>>()
+  val turns: List<Pair<String, Turn>> = _turns
   //private val initialDeck = deck.snapshot()
   
   init {
@@ -246,6 +247,9 @@ class UnoGame(
     }
     played.push(firstCard)
     color = firstCard.color
+    repeat(7) {
+      players.forEach(::giveCard)
+    }
   }
   
   fun play(): String {
@@ -300,11 +304,11 @@ class UnoGame(
               deck = played
               deck.draw() // discard top
             }
-            player.draw(deck.draw())
+            giveCard(player)
           }
         }
       }
-      turns.add(player.name to turn)
+      _turns.add(player.name to turn)
       nextTurn()
     }
     val winner = players.first { it.hand.isEmpty() }
@@ -332,6 +336,10 @@ class UnoGame(
       Rotation.CounterClockwise -> Rotation.Clockwise
     }
   }
+  
+  private fun giveCard(player: Player) {
+    player.draw(deck.draw())
+  }
 }
 
 class DumbStrategy : Strategy {
@@ -357,6 +365,19 @@ class DumbStrategy : Strategy {
 }
 
 fun main() {
+  val game = UnoGame(
+      players = listOf(
+        Player("p1", DumbStrategy()),
+        Player("p2", DumbStrategy()),
+        Player("p3", DumbStrategy()),
+        Player("p4", DumbStrategy()),
+      )
+  )
+  println(game.play())
+  game.turns.forEach { (name, turn) ->
+    println("$name: $turn")
+  }
+  return
   val wins = mutableMapOf(
     "p1" to 0,
     "p2" to 0,
