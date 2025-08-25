@@ -224,7 +224,8 @@ data class MustDraw(
 )
    
 class UnoGame(
-  private val players: List<Player>
+  private val players: List<Player>,
+  private val debug: Boolean = false,  
 ) {
   private var turn = 0
   private var turnCount = 0
@@ -305,7 +306,9 @@ class UnoGame(
           repeat(mustDraw?.cards ?: 1) {
             if (deck.isEmpty()) {
               deck = played.clone()
-              println("new deck(${deck.size}); played(${played.size})")
+              if (debug) {
+                println("new deck(${deck.size}); played(${played.size})")
+              }
               deck.draw() // discard top
             }
             giveCard(player)
@@ -314,7 +317,9 @@ class UnoGame(
         }
       }
       _turns.add(player.name to turn)
-      println("${player.name} (${player.hand.size}): $turn deck(${deck.size})")
+      if (debug) {
+        println("${player.name} (${player.hand.size}): $turn deck(${deck.size})")
+      }
       nextTurn()
     }
     val winner = players.first { it.hand.isEmpty() }
