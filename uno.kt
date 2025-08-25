@@ -308,7 +308,6 @@ class UnoGame(
       nextTurn()
     }
     val winner = players.first { it.hand.isEmpty() }
-    println(winner.name)
     return winner.name
   }
   
@@ -363,19 +362,18 @@ fun main() {
     "p2" to 0,
     "p3" to 0,
     "p4" to 0,
-  )
-  repeat(1000) {
-    val game = UnoGame(
+   )
+   repeat(1000) {
+     val game = UnoGame(
       players = listOf(
         Player("p1", DumbStrategy()),
         Player("p2", DumbStrategy()),
         Player("p3", DumbStrategy()),
         Player("p4", DumbStrategy()),
       )
-    )
-  
-    val w = game.play()
-    wins[w] = wins[w]!! + 1
+     )
+     val w = game.play()
+     wins[w] = wins[w]!! + 1
   }
   println(wins)
 }
