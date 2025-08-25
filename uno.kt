@@ -270,6 +270,7 @@ class UnoGame(
            val card = turn.card
            player.play(card)
            played.push(card)
+           color = card.color
            if (card is UnoCard.Reverse) {
              reverse()  
            }
@@ -305,7 +306,6 @@ class UnoGame(
         is Turn.Draw -> {
           repeat(mustDraw?.cards ?: 1) {
             if (deck.isEmpty()) {
-              // TODO: this case is broken, fix it!
               deck = played.clone()
               if (debug) {
                 println("[RESET] deck(${deck.size}); played(${played.size})")
@@ -321,6 +321,12 @@ class UnoGame(
         }
       }
       _turns.add(player.name to turn)
+      val totalCards = deck.size + played.size + players.sumOf {
+        it.hand.size
+      }
+      require(totalCards == 108) {
+        "Cards invariant broken! Total cards = $totalCards"  
+      }
       if (debug) {
         println("${player.name} (${player.hand.size}): $turn deck(${deck.size})")
       }
@@ -401,7 +407,7 @@ fun main() {
     ),
     debug = true,
   )
-  println("Winner: ${game.play()}")
+  println("Winner: ${game.play()} after ${game.turns.size} turns.")
   return
   val wins = mutableMapOf(
     "p1" to 0,
