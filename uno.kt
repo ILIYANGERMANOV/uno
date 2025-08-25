@@ -231,7 +231,7 @@ class UnoGame(
   private var turnCount = 0
   private var rotation = Rotation.Clockwise
   private var deck = UnoDeck()
-  private val played = UnoDeck(empty = true)
+  private var played = UnoDeck(empty = true)
   private lateinit var color: UnoColor
   private var mustDraw: MustDraw? = null
     
@@ -305,11 +305,15 @@ class UnoGame(
         is Turn.Draw -> {
           repeat(mustDraw?.cards ?: 1) {
             if (deck.isEmpty()) {
+              // TODO: this case is broken, fix it!
               deck = played.clone()
               if (debug) {
-                println("new deck(${deck.size}); played(${played.size})")
+                println("[RESET] deck(${deck.size}); played(${played.size})")
               }
-              deck.draw() // discard top
+              played = UnoDeck(empty = true).also {
+               it.push(deck.draw()) // restore top
+              }
+              deck.shuffle()
             }
             giveCard(player)
           }
@@ -394,7 +398,8 @@ fun main() {
       Player("p2", DumbStrategy()),
       Player("p3", DumbStrategy()),
       Player("p4", DumbStrategy()),
-    )
+    ),
+    debug = true,
   )
   println("Winner: ${game.play()}")
   return
