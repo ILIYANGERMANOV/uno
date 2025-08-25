@@ -4,7 +4,6 @@ sealed interface UnoCard {
   }
   sealed interface Wildcard : UnoCard
   
-  
   data class Number(
     val n: Int, 
     override val color: UnoColor
@@ -398,37 +397,45 @@ class DumbStrategy : Strategy {
 }
 
 fun main() {
-  val game = UnoGame(
-    players = listOf(
-      Player("p1", DumbStrategy()),
-      Player("p2", DumbStrategy()),
-      Player("p3", DumbStrategy()),
-      Player("p4", DumbStrategy()),
+  simulate(
+    ps = listOf(
+      "p1" to DumbStrategy(),
+      "p2" to DumbStrategy(),
+      "p3" to DumbStrategy(),
+      "p4" to DumbStrategy(),
     ),
-    debug = true,
+    shufflePlayers = false,
   )
-  println("Winner: ${game.play()} after ${game.turns.size} turns.")
-  val wins = mutableMapOf(
-    "p1" to 0,
-    "p2" to 0,
-    "p3" to 0,
-    "p4" to 0,
-   )
+}
+
+fun simulate(
+ ps: List<Pair<String, Strategy>>,
+ games: Int = 50_000,
+ shufflePlayers: Boolean = true,
+) {
+   val wins = mutableMapOf<String, Int>()
+   ps.forEach { p ->
+     wins[p.first] = 0
+   }
    var totalTurns = 0
-   val games = 50_000
    repeat(games) {
+     val players = (if (shufflePlayers) 
+       ps.shuffled()
+     else
+       ps
+     ).map { (name, strategy) ->
+       Player(
+         name = name,
+         strategy = strategy,
+       )
+     }
      val game = UnoGame(
-      players = listOf(
-        Player("p1", DumbStrategy()),
-        Player("p2", DumbStrategy()),
-        Player("p3", DumbStrategy()),
-        Player("p4", DumbStrategy()),
-      )
+      players = players,
      )
      val w = game.play()
      wins[w] = wins[w]!! + 1
      totalTurns += game.turns.size
   }
   println(wins)
-  println("Avg turns per game: ${totalTurns / games}")
+  println("Avg turns per game: ${totalTurns / games}") 
 }
