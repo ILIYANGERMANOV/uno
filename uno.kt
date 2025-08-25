@@ -90,9 +90,10 @@ class UnoDeck(empty: Boolean = false) {
      return cards.last() 
   }
   
-  fun snapshot(): UnoDeck {
-    return UnoDeck(empty = true).apply {
-      cards.forEach { push(it) }
+  fun clone(): UnoDeck {
+    val cards = cards
+    return UnoDeck(empty = true).also { cloned ->
+      cards.forEach { cloned.push(it) }
     }
   }
   
@@ -303,7 +304,8 @@ class UnoGame(
         is Turn.Draw -> {
           repeat(mustDraw?.cards ?: 1) {
             if (deck.isEmpty()) {
-              deck = played.snapshot()
+              deck = played.clone()
+              println("new deck(${deck.size}); played(${played.size})")
               deck.draw() // discard top
             }
             giveCard(player)
@@ -389,10 +391,7 @@ fun main() {
       Player("p4", DumbStrategy()),
     )
   )
-  println(game.play())
-  game.turns.forEach { (name, turn) ->
-    println("$name: $turn")
-  }
+  println("Winner: ${game.play()}")
   return
   val wins = mutableMapOf(
     "p1" to 0,
