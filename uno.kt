@@ -444,5 +444,7 @@ fun simulate(
       "$p: $w wins (${(w.toFloat()/games).toString().take(5)})"
     }.joinToString(separator="\n")
   )
-  println("Avg turns per game: ${totalTurns / games}") 
+  val avgGameTurns = totalTurns / games
+  val avgPlayerTurns = avgGameTurns / ps.size
+  println("Avg $avgGameTurns turns in a game ($avgPlayerTurns per player)") 
 }
