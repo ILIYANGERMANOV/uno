@@ -4,6 +4,7 @@ sealed interface UnoCard {
   }
   sealed interface Wildcard : UnoCard
   
+  
   data class Number(
     val n: Int, 
     override val color: UnoColor
@@ -404,6 +405,7 @@ fun main() {
       "p3" to DumbStrategy(),
       "p4" to DumbStrategy(),
     ),
+    //games = 100,
     shufflePlayers = false,
   )
 }
@@ -413,6 +415,7 @@ fun simulate(
  games: Int = 50_000,
  shufflePlayers: Boolean = true,
 ) {
+   println("$games games, shuffled=$shufflePlayers")
    val wins = mutableMapOf<String, Int>()
    ps.forEach { p ->
      wins[p.first] = 0
@@ -436,6 +439,10 @@ fun simulate(
      wins[w] = wins[w]!! + 1
      totalTurns += game.turns.size
   }
-  println(wins)
+  println(
+    wins.map { (p, w) ->
+      "$p: $w wins (${(w.toFloat()/games).toString().take(5)})"
+    }.joinToString(separator="\n")
+  )
   println("Avg turns per game: ${totalTurns / games}") 
 }
