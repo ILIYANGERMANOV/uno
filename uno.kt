@@ -130,7 +130,7 @@ class Player(
        is Turn.Play -> {
          val card = turn.card
          if (mustDraw != null) {
-           require(mustDraw.factor == DrawFactor.Two) {
+           require(mustDraw.factor != DrawFactor.Four) {
              "Draw 4 can be answered only by draw 4"
            }
            require(card is UnoCard.Draw2) {
@@ -152,7 +152,7 @@ class Player(
          require(
            hand.none { 
              it is UnoCard.Colored && it.color == color
-           }
+           } || mustDraw != null
          ) {
            "Can't draw when you can match the color!"
          }
@@ -352,8 +352,20 @@ class DumbStrategy : Strategy {
   ): Turn {
     val card = hand.firstOrNull {
       when(it) {
-        is UnoCard.Colored -> it.color == color
-        is UnoCard.Wildcard -> true
+        is UnoCard.Colored -> if (mustDraw != null) {
+          it is UnoCard.Draw2 && mustDraw.factor == DrawFactor.Two
+        } else {
+          it.color == color ||
+          (it is UnoCard.Number && 
+             lastCard is UnoCard.Number &&
+             it.n == lastCard.n) ||
+          (it is UnoCard.Reverse && 
+             lastCard is UnoCard.Reverse) ||
+          (it is UnoCard.Skip &&
+             lastCard is UnoCard.Skip)    
+        }
+        is UnoCard.Wildcard -> 
+          mustDraw == null || it is UnoCard.Draw4
       }
     }
     return when(card) {
@@ -366,12 +378,12 @@ class DumbStrategy : Strategy {
 
 fun main() {
   val game = UnoGame(
-      players = listOf(
-        Player("p1", DumbStrategy()),
-        Player("p2", DumbStrategy()),
-        Player("p3", DumbStrategy()),
-        Player("p4", DumbStrategy()),
-      )
+    players = listOf(
+      Player("p1", DumbStrategy()),
+      Player("p2", DumbStrategy()),
+      Player("p3", DumbStrategy()),
+      Player("p4", DumbStrategy()),
+    )
   )
   println(game.play())
   game.turns.forEach { (name, turn) ->
