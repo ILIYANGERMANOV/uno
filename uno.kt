@@ -117,6 +117,10 @@ class Player(
    private val _hand = mutableListOf<UnoCard>()
    val hand: List<UnoCard> = _hand
     
+   // History
+   private val _handHistory = mutableListOf<Pair<List<UnoCard>, Turn>>()
+   val handHistory: List<Pair<List<UnoCard>, Turn>> = _handHistory
+    
    fun turn(
      lastCard: UnoCard,
      rotation: Rotation,
