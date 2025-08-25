@@ -462,3 +462,46 @@ fun simulate(
   val avgPlayerTurns = avgGameTurns / ps.size
   println("Avg $avgGameTurns turns in a game ($avgPlayerTurns per player)") 
 }
+
+class RandomStrategy : Strategy {
+  override fun turn(
+    hand: List<UnoCard>,
+    lastCard: UnoCard,
+    rotation: Rotation,
+    color: UnoColor,
+    mustDraw: MustDraw?,
+  ): Turn {
+    val card = hand.filter {
+      validTurn(
+        card = it,
+        lastCard = lastCard,
+        color = color,
+        mustDraw = mustDraw,
+      )
+    }.takeIf { it.isNotEmpty() }?.random()
+    return when(card) {
+      is UnoCard.Colored -> Turn.Play(card)
+      is UnoCard.Wildcard -> Turn.PlayWildcard(
+        card = card, 
+        newColor = dominantColor(hand),
+      )
+      else -> Turn.Draw
+    }
+  }
+}
+
+fun dominantColor(
+  cards: List<UnoCard>
+): UnoColor {
+   val count = buildMap {
+     UnoColor.entries.forEach { color ->
+       put(color, 0)
+     }
+   }.toMutableMap()
+   cards.forEach { card ->
+     if (card is UnoCard.Colored) {
+       count[card.color] = count[card.color]!! + 1
+     }
+   }
+   return count.maxBy { (_, c) -> c }.key
+}
