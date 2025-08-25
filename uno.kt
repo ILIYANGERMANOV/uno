@@ -63,6 +63,9 @@ class UnoDeck(empty: Boolean = false) {
     }
   }.shuffled()
   
+  val size: Int
+    get() = cards.size
+  
   fun shuffle() {
     cards = cards.shuffled()
   }
@@ -220,9 +223,8 @@ data class MustDraw(
 )
    
 class UnoGame(
-  players: List<Player>
+  private val players: List<Player>
 ) {
-  private val players = players.shuffled()
   private var turn = 0
   private var turnCount = 0
   private var rotation = Rotation.Clockwise
@@ -301,14 +303,16 @@ class UnoGame(
         is Turn.Draw -> {
           repeat(mustDraw?.cards ?: 1) {
             if (deck.isEmpty()) {
-              deck = played
+              deck = played.snapshot()
               deck.draw() // discard top
             }
             giveCard(player)
           }
+          mustDraw = null
         }
       }
       _turns.add(player.name to turn)
+      println("${player.name} (${player.hand.size}): $turn deck(${deck.size})")
       nextTurn()
     }
     val winner = players.first { it.hand.isEmpty() }
