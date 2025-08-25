@@ -372,22 +372,12 @@ class DumbStrategy : Strategy {
     mustDraw: MustDraw?,
   ): Turn {
     val card = hand.firstOrNull {
-      when(it) {
-        is UnoCard.Colored -> if (mustDraw != null) {
-          it is UnoCard.Draw2 && mustDraw.factor == DrawFactor.Two
-        } else {
-          it.color == color ||
-          (it is UnoCard.Number && 
-             lastCard is UnoCard.Number &&
-             it.n == lastCard.n) ||
-          (it is UnoCard.Reverse && 
-             lastCard is UnoCard.Reverse) ||
-          (it is UnoCard.Skip &&
-             lastCard is UnoCard.Skip)    
-        }
-        is UnoCard.Wildcard -> 
-          mustDraw == null || it is UnoCard.Draw4
-      }
+      validTurn(
+        card = it,
+        lastCard = lastCard,
+        color = color,
+        mustDraw = mustDraw,
+      )
     }
     return when(card) {
       is UnoCard.Colored -> Turn.Play(card)
@@ -395,6 +385,30 @@ class DumbStrategy : Strategy {
       else -> Turn.Draw
     }
   }
+}
+
+fun validTurn(
+  card: UnoCard,
+  mustDraw: MustDraw?,
+  color: UnoColor,
+  lastCard: UnoCard,
+): Boolean {
+   return when(card) {
+        is UnoCard.Colored -> if (mustDraw != null) {
+          card is UnoCard.Draw2 && mustDraw.factor == DrawFactor.Two
+        } else {
+          card.color == color ||
+          (card is UnoCard.Number && 
+             lastCard is UnoCard.Number &&
+             card.n == lastCard.n) ||
+          (card is UnoCard.Reverse && 
+             lastCard is UnoCard.Reverse) ||
+          (card is UnoCard.Skip &&
+             lastCard is UnoCard.Skip)    
+        }
+        is UnoCard.Wildcard -> 
+          mustDraw == null || card is UnoCard.Draw4
+      }
 }
 
 fun main() {
