@@ -408,14 +408,15 @@ fun main() {
     debug = true,
   )
   println("Winner: ${game.play()} after ${game.turns.size} turns.")
-  return
   val wins = mutableMapOf(
     "p1" to 0,
     "p2" to 0,
     "p3" to 0,
     "p4" to 0,
    )
-   repeat(1000) {
+   var totalTurns = 0
+   val games = 50_000
+   repeat(games) {
      val game = UnoGame(
       players = listOf(
         Player("p1", DumbStrategy()),
@@ -426,6 +427,8 @@ fun main() {
      )
      val w = game.play()
      wins[w] = wins[w]!! + 1
+     totalTurns += game.turns.size
   }
   println(wins)
+  println("Avg turns per game: ${totalTurns / games}")
 }
