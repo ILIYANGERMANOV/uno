@@ -434,7 +434,7 @@ fun main() {
 
 fun simulate(
  ps: List<Pair<String, Strategy>>,
- games: Int = 50_000,
+ games: Int = 40_000,
  shufflePlayers: Boolean = true,
 ) {
    println("$games games, shuffled=$shufflePlayers")
@@ -548,6 +548,7 @@ data class HandStats(
   }
   
   override fun toString(): String {
+    val best = draw2 + draw4 + changeColor
     return "HandStats(" +
     "${special.format()} special, " +
     "${number.format()} Number, " +
@@ -559,7 +560,8 @@ data class HandStats(
     "${reverse.format()} Reverse, " +
     "${colors.format()} colors, " +
     "${colorStreak.format()} of same color, " +
-    "${sameNumbers.format()} same numbers" +
+    "${sameNumbers.format()} same numbers, " +
+    "${best.format()} best cards" +
     ")"
   }
   
