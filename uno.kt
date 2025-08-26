@@ -484,18 +484,24 @@ fun simulate(
 
 data class HandStats(
   val special: Float = 0f,
+  val number: Float = 0f,
   val draw2: Float = 0f,
   val draw4: Float = 0f,
   val changeColor: Float = 0f,
+  val skip: Float = 0f,
+  val reverse: Float = 0f,
   val colors: Float = 0f,
   val colorStreak: Float = 0f,
   val sameNumbers: Float = 0f,
 ) {
   constructor(hand: List<UnoCard>) : this(
     special = hand.count { it !is UnoCard.Number }.toFloat(),
-    draw2 = hand.count { it is UnoCard.Draw2 }.toFloat(),
-    draw4 = hand.count { it is UnoCard.Draw4 }.toFloat(),
-    changeColor = hand.count { it is UnoCard.ChangeColor }.toFloat(),
+    number = hand.countByCardType<UnoCard.Number>(),
+    draw2 = hand.countByCardType<UnoCard.Draw2>(),
+    draw4 = hand.countByCardType<UnoCard.Draw4>(),
+    changeColor = hand.countByCardType<UnoCard.ChangeColor>(),
+    skip = hand.countByCardType<UnoCard.Skip>(),
+    reverse = hand.countByCardType<UnoCard.Reverse>(),
     colors = hand.mapNotNull {
       (it as? UnoCard.Colored)?.color
     }.toSet().size.toFloat(),
@@ -510,9 +516,12 @@ data class HandStats(
   operator fun plus(other: HandStats): HandStats {
     return HandStats(
       special = special + other.special,
+      number = number + other.number,
       draw2 = draw2 + other.draw2,
       draw4 = draw4 + other.draw4,
       changeColor = changeColor + other.changeColor,
+      skip = skip + other.skip,
+      reverse = reverse + other.reverse,
       colors = colors + other.colors,
       colorStreak = colorStreak + other.colorStreak,
       sameNumbers = sameNumbers + other.sameNumbers,
@@ -522,9 +531,12 @@ data class HandStats(
   fun divide(n: Int): HandStats {
     return HandStats(
       special = special / n,
+      number = number / n,
       draw2 = draw2 / n,
       draw4 = draw4 / n,
       changeColor = changeColor / n,
+      skip = skip / n,
+      reverse = reverse / n,
       colors = colors / n,
       colorStreak = colorStreak / n,
       sameNumbers = sameNumbers / n,
@@ -534,10 +546,13 @@ data class HandStats(
   override fun toString(): String {
     return "HandStats(" +
     "${special.format()} special, " +
+    "${number.format()} Number, " +
     "${draw2.format()} Draw2, " +
     "${draw4.format()} Draw4, " +
     "${(draw2 + draw4).format()} total draw, " +
     "${changeColor.format()} ChangeColor, " +
+    "${skip.format()} Skip, " +
+    "${reverse.format()} Reverse, " +
     "${colors.format()} colors, " +
     "${colorStreak.format()} of same color, " +
     "${sameNumbers.format()} same numbers" +
@@ -545,6 +560,10 @@ data class HandStats(
   }
   
   companion object {
+    private inline fun <reified T: UnoCard> List<UnoCard>.countByCardType(): Float {
+      return this.count { it is T }.toFloat()
+    }
+    
     private fun <T> List<UnoCard>.maxCountBy(
       selector: (UnoCard) -> T,
     ): Int {
