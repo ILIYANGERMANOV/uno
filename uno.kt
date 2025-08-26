@@ -443,7 +443,8 @@ fun simulate(
      wins[p.first] = 0
    }
    var totalTurns = 0
-   var winnerStats = WinnerStats()
+   var winnerStats = HandStats()
+   var losersStats = HandStats()
    repeat(games) {
      val players = (if (shufflePlayers) 
        ps.shuffled()
@@ -461,7 +462,11 @@ fun simulate(
      val winner = game.play()
      wins[winner.name] = wins[winner.name]!! + 1
      totalTurns += game.turns.size
-     winnerStats += WinnerStats(winner.history[0].first)
+     winnerStats += HandStats(winner.history[0].first)
+     players.filter { it.name != winner.name }
+       .forEach { loser ->
+         losersStats += HandStats(loser.history[0].first)
+       }
   }
   println(
     wins.map { (p, w) ->
@@ -472,10 +477,12 @@ fun simulate(
   val avgPlayerTurns = avgGameTurns / ps.size
   println("Avg $avgGameTurns turns in a game ($avgPlayerTurns per player)")
   val avgWinnerStats = winnerStats.divide(games)
-  println(avgWinnerStats)
+  println("Avg winner: $avgWinnerStats")
+  val avgLoserStats = losersStats.divide(games).divide(ps.size - 1)
+  println("Avg loser: $avgLoserStats")
 }
 
-data class WinnerStats(
+data class HandStats(
   val special: Float = 0f,
   val draw2: Float = 0f,
   val draw4: Float = 0f,
@@ -500,8 +507,8 @@ data class WinnerStats(
     }.toFloat(),
   )
   
-  operator fun plus(other: WinnerStats): WinnerStats {
-    return WinnerStats(
+  operator fun plus(other: HandStats): HandStats {
+    return HandStats(
       special = special + other.special,
       draw2 = draw2 + other.draw2,
       draw4 = draw4 + other.draw4,
@@ -512,8 +519,8 @@ data class WinnerStats(
     )
   }
   
-  fun divide(n: Int): WinnerStats {
-    return WinnerStats(
+  fun divide(n: Int): HandStats {
+    return HandStats(
       special = special / n,
       draw2 = draw2 / n,
       draw4 = draw4 / n,
@@ -522,6 +529,19 @@ data class WinnerStats(
       colorStreak = colorStreak / n,
       sameNumbers = sameNumbers / n,
     )
+  }
+  
+  override fun toString(): String {
+    return "HandStats(" +
+    "${special.format()} special, " +
+    "${draw2.format()} Draw2, " +
+    "${draw4.format()} Draw4, " +
+    "${(draw2 + draw4).format()} total draw, " +
+    "${changeColor.format()} ChangeColor, " +
+    "${colors.format()} colors, " +
+    "${colorStreak.format()} of same color, " +
+    "${sameNumbers.format()} same numbers" +
+    ")"
   }
   
   companion object {
@@ -577,4 +597,10 @@ fun dominantColor(
      }
    }
    return count.maxBy { (_, c) -> c }.key
+}
+
+private fun Float.format(
+  decimalPlaces: Int = 2,
+): String {
+  return String.format("%.${decimalPlaces}f", this)
 }
