@@ -422,10 +422,10 @@ fun validTurn(
 fun main() {
   simulate(
     ps = listOf(
-      "p1" to DumbStrategy(),
-      "p2" to DumbStrategy(),
-      "p3" to DumbStrategy(),
-      "p4" to DumbStrategy(),
+      "dumb1" to DumbStrategy(),
+      "dumb2" to DumbStrategy(),
+      "random3" to RandomStrategy(),
+      "random4" to RandomStrategy(),
     ),
     //games = 1,
     //shufflePlayers = false,
@@ -469,17 +469,21 @@ fun simulate(
        }
   }
   println(
-    wins.map { (p, w) ->
-      "$p: $w wins (${(w.toFloat()/games).toString().take(5)})"
-    }.joinToString(separator="\n")
+    wins
+      .map { (p, w) ->
+        w to "$p: $w wins (${(w.toFloat()/games).toString().take(5)})"
+      }
+      .sortedByDescending { (w, _) -> w }
+      .map { (_, s) -> s }
+      .joinToString(separator="\n")
   )
   val avgGameTurns = totalTurns / games
   val avgPlayerTurns = avgGameTurns / ps.size
   println("Avg $avgGameTurns turns in a game ($avgPlayerTurns per player)")
   val avgWinnerStats = winnerStats.divide(games)
-  println("Avg winner: $avgWinnerStats")
+  println("Winner: $avgWinnerStats")
   val avgLoserStats = losersStats.divide(games).divide(ps.size - 1)
-  println("Avg loser: $avgLoserStats")
+  println("Loser: $avgLoserStats")
 }
 
 data class HandStats(
