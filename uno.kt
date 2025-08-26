@@ -434,7 +434,7 @@ fun main() {
 
 fun simulate(
  ps: List<Pair<String, Strategy>>,
- games: Int = 40_000,
+ games: Int = 30_000,
  shufflePlayers: Boolean = true,
 ) {
    println("$games games, shuffled=$shufflePlayers")
@@ -662,10 +662,14 @@ class LocalStrategy : Strategy {
       }
     }
    
-    // Counter MustDraw
-    // TODO
+    var priority = null
     
-    val candidate = possible.firstOrNull() 
+    // Counter MustDraw
+    if (mustDraw != null) {
+      // TODO
+    }
+    
+    val candidate = priority ?: possible.firstOrNull() 
       ?: return Turn.Draw
     val canSkip = possible.none {
       it is UnoCard.Colored && it.color == color
