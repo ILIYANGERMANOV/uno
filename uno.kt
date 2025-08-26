@@ -629,3 +629,31 @@ private fun Float.format(
 ): String {
   return String.format("%.${decimalPlaces}f", this)
 }
+
+class LocalStrategy : Strategy {
+ override fun turn(
+   hand: List<UnoCard>,
+   lastCard: UnoCard,
+   rotation: Rotation,
+   color: UnoColor,
+   mustDraw: MustDraw?,
+ ): Turn {
+   val possible = hand.filter {
+     validTurn(
+       card = it,
+       lastCard = lastCard,
+       color = color,
+       mustDraw = mustDraw,
+     )
+    }
+    val card: UnoCard? = null
+    return when(card) {
+      is UnoCard.Colored -> Turn.Play(card)
+      is UnoCard.Wildcard -> Turn.PlayWildcard(
+        card = card, 
+        newColor = dominantColor(hand),
+      )
+      else -> Turn.Draw
+    }
+  } 
+}
