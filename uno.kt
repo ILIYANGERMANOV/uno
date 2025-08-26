@@ -127,6 +127,9 @@ class Player(
      color: UnoColor,
      mustDraw: MustDraw?,
    ): Turn {
+     require(hand.isNotEmpty()) {
+       "Cannot play with an empty hand!"
+     }
      val turn = strategy.turn(
          hand = hand,
          lastCard = lastCard,
@@ -166,7 +169,7 @@ class Player(
          }
        }
      }
-     _history.add(hand to turn)
+     _history.add(hand.toList() to turn)
      return turn
    }
    
@@ -424,8 +427,8 @@ fun main() {
       "p3" to DumbStrategy(),
       "p4" to DumbStrategy(),
     ),
-    //games = 100,
-    shufflePlayers = false,
+    //games = 1,
+    //shufflePlayers = false,
   )
 }
 
