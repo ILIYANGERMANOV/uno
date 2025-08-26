@@ -118,8 +118,8 @@ class Player(
    val hand: List<UnoCard> = _hand
     
    // History
-   private val _handHistory = mutableListOf<Pair<List<UnoCard>, Turn>>()
-   val handHistory: List<Pair<List<UnoCard>, Turn>> = _handHistory
+   private val _history = mutableListOf<Pair<List<UnoCard>, Turn>>()
+   val history: List<Pair<List<UnoCard>, Turn>> = _history
     
    fun turn(
      lastCard: UnoCard,
@@ -166,6 +166,7 @@ class Player(
          }
        }
      }
+     _history.add(hand to turn)
      return turn
    }
    
@@ -260,7 +261,7 @@ class UnoGame(
     }
   }
   
-  fun play(): String {
+  fun play(): Player {
     while(players.all { it.hand.isNotEmpty() }) {
       val player = players[turn]
       val turn = player.turn(
@@ -337,7 +338,7 @@ class UnoGame(
       nextTurn()
     }
     val winner = players.first { it.hand.isEmpty() }
-    return winner.name
+    return winner
   }
   
   private fun nextTurn() {
@@ -439,6 +440,7 @@ fun simulate(
      wins[p.first] = 0
    }
    var totalTurns = 0
+   var winnerStats = WinnerStats()
    repeat(games) {
      val players = (if (shufflePlayers) 
        ps.shuffled()
@@ -453,9 +455,10 @@ fun simulate(
      val game = UnoGame(
       players = players,
      )
-     val w = game.play()
-     wins[w] = wins[w]!! + 1
+     val winner = game.play()
+     wins[winner.name] = wins[winner.name]!! + 1
      totalTurns += game.turns.size
+     winnerStats += WinnerStats(winner.history[0].first)
   }
   println(
     wins.map { (p, w) ->
@@ -464,7 +467,70 @@ fun simulate(
   )
   val avgGameTurns = totalTurns / games
   val avgPlayerTurns = avgGameTurns / ps.size
-  println("Avg $avgGameTurns turns in a game ($avgPlayerTurns per player)") 
+  println("Avg $avgGameTurns turns in a game ($avgPlayerTurns per player)")
+  val avgWinnerStats = winnerStats.divide(games)
+  println(avgWinnerStats)
+}
+
+data class WinnerStats(
+  val special: Float = 0f,
+  val draw2: Float = 0f,
+  val draw4: Float = 0f,
+  val changeColor: Float = 0f,
+  val colors: Float = 0f,
+  val colorStreak: Float = 0f,
+  val sameNumbers: Float = 0f,
+) {
+  constructor(hand: List<UnoCard>) : this(
+    special = hand.count { it !is UnoCard.Number }.toFloat(),
+    draw2 = hand.count { it is UnoCard.Draw2 }.toFloat(),
+    draw4 = hand.count { it is UnoCard.Draw4 }.toFloat(),
+    changeColor = hand.count { it is UnoCard.ChangeColor }.toFloat(),
+    colors = hand.mapNotNull {
+      (it as? UnoCard.Colored)?.color
+    }.toSet().size.toFloat(),
+    colorStreak = hand.maxCountBy {
+      (it as? UnoCard.Colored)?.color
+    }.toFloat(),
+    sameNumbers = hand.maxCountBy {
+      (it as? UnoCard.Number)?.n
+    }.toFloat(),
+  )
+  
+  operator fun plus(other: WinnerStats): WinnerStats {
+    return WinnerStats(
+      special = special + other.special,
+      draw2 = draw2 + other.draw2,
+      draw4 = draw4 + other.draw4,
+      changeColor = changeColor + other.changeColor,
+      colors = colors + other.colors,
+      colorStreak = colorStreak + other.colorStreak,
+      sameNumbers = sameNumbers + other.sameNumbers,
+    )
+  }
+  
+  fun divide(n: Int): WinnerStats {
+    return WinnerStats(
+      special = special / n,
+      draw2 = draw2 / n,
+      draw4 = draw4 / n,
+      changeColor = changeColor / n,
+      colors = colors / n,
+      colorStreak = colorStreak / n,
+      sameNumbers = sameNumbers / n,
+    )
+  }
+  
+  companion object {
+    private fun <T> List<UnoCard>.maxCountBy(
+      selector: (UnoCard) -> T,
+    ): Int {
+      return this.groupingBy(selector)
+       .eachCount()
+       .maxByOrNull { entry -> entry.value }
+       ?.value ?: 0
+    } 
+  }
 }
 
 class RandomStrategy : Strategy {
