@@ -638,6 +638,7 @@ class LocalStrategy : Strategy {
    color: UnoColor,
    mustDraw: MustDraw?,
  ): Turn {
+   val dominantColor = dominantColor(hand)
    val possible = hand.filter {
      validTurn(
        card = it,
@@ -645,15 +646,53 @@ class LocalStrategy : Strategy {
        color = color,
        mustDraw = mustDraw,
      )
+    }.sortedByDescending {
+      when {
+        it is UnoCard.Number -> {
+          if (it.color == dominantColor) 0 else 1
+        }
+        it is UnoCard.Skip -> 2
+        it is UnoCard.Colored -> if (it.color == dominantColor)
+          3 else 4
+        it is UnoCard.Draw2 -> if (it.color == dominantColor) 
+          5 else 6
+        it is UnoCard.ChangeColor -> 7
+        it is UnoCard.Draw4 -> 8
+        else -> 4
+      }
     }
-    val card: UnoCard? = null
-    return when(card) {
-      is UnoCard.Colored -> Turn.Play(card)
-      is UnoCard.Wildcard -> Turn.PlayWildcard(
-        card = card, 
-        newColor = dominantColor(hand),
-      )
-      else -> Turn.Draw
+   
+    // Counter MustDraw
+    // TODO
+    
+    val candidate = possible.firstOrNull() 
+      ?: return Turn.Draw
+    val canSkip = possible.none {
+      it is UnoCard.Colored && it.color == color
+    }
+    return when(candidate) {
+      is UnoCard.Draw2 -> {
+        if (canSkip) Turn.Draw else Turn.Play(candidate)
+      }
+      is UnoCard.Wildcard -> {
+        val shouldPlay = !canSkip ||
+          possible.all { 
+            it is UnoCard.Wildcard
+          }
+        if (shouldPlay) {
+          Turn.PlayWildcard(
+            card = candidate,
+            newColor = dominantColor,
+          )
+        } else Turn.Draw
+      }
+      else -> when(candidate) {
+        is UnoCard.Colored -> Turn.Play(candidate)
+        is UnoCard.Wildcard -> Turn.PlayWildcard(
+          card = candidate,
+          newColor = dominantColor,
+        )
+      }
     }
   } 
 }
