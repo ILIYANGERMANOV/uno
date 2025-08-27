@@ -720,7 +720,6 @@ class LocalStrategy() : Strategy {
            || it is UnoCard.Draw4 
            || it is UnoCard.Skip
            || it is UnoCard.ChangeColor
-           || it is UnoCard.Reverse
        }.firstOrNull()
      }
     
