@@ -107,6 +107,7 @@ interface Strategy {
     rotation: Rotation,
     color: UnoColor,
     mustDraw: MustDraw?,
+    nextPlayers: List<Int>,
   ): Turn
 }
 
@@ -126,6 +127,7 @@ class Player(
      rotation: Rotation,
      color: UnoColor,
      mustDraw: MustDraw?,
+     nextPlayers: List<Int>,
    ): Turn {
      require(hand.isNotEmpty()) {
        "Cannot play with an empty hand!"
@@ -136,6 +138,7 @@ class Player(
          rotation = rotation,
          color = color,
          mustDraw = mustDraw,
+         nextPlayers = nextPlayers,
      )
      when(turn) {
        is Turn.Play -> {
@@ -273,6 +276,7 @@ class UnoGame(
         rotation = rotation,
         color = color,
         mustDraw = mustDraw,
+        nextPlayers = nextPlayers(),
       )
       when(turn) {
         is Turn.Play -> {
@@ -346,19 +350,34 @@ class UnoGame(
     return winner
   }
   
+  private fun nextPlayers(): List<Int> {
+    return buildList {
+      var i = computeNextTurn()
+      while(size != players.size - 1) {
+        add(players[i].hand.size)
+        i = computeNextTurn()
+      }
+    }
+  }
+  
   private fun nextTurn() {
-    when(rotation) {
+    turn = computeNextTurn()
+    turnCount++
+  }
+  
+  private fun computeNextTurn(): Int {
+    return when(rotation) {
       Rotation.Clockwise -> {
-        turn = (turn + 1) % players.size
+        (turn + 1) % players.size
       }
       Rotation.CounterClockwise -> {
-        turn--
-        if (turn < 0) {
-          turn = players.lastIndex
+        if (turn - 1 < 0) {
+          players.lastIndex
+        } else {
+          turn - 1
         }
       }
     }
-    turnCount++
   }
   
   private fun reverse() {
@@ -380,6 +399,7 @@ class DumbStrategy : Strategy {
     rotation: Rotation,
     color: UnoColor,
     mustDraw: MustDraw?,
+    nextPlayers: List<Int>,
   ): Turn {
     val card = hand.firstOrNull {
       validTurn(
@@ -593,6 +613,7 @@ class RandomStrategy : Strategy {
     rotation: Rotation,
     color: UnoColor,
     mustDraw: MustDraw?,
+    nextPlayers: List<Int>,
   ): Turn {
     val card = hand.filter {
       validTurn(
@@ -642,6 +663,7 @@ class LocalStrategy : Strategy {
    rotation: Rotation,
    color: UnoColor,
    mustDraw: MustDraw?,
+   nextPlayers: List<Int>,
  ): Turn {
    val dominantColor = dominantColor(hand)
    val possible = hand.filter {
