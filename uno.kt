@@ -392,31 +392,6 @@ class UnoGame(
   }
 }
 
-class DumbStrategy : Strategy {
-  override fun turn(
-    hand: List<UnoCard>,
-    lastCard: UnoCard,
-    rotation: Rotation,
-    color: UnoColor,
-    mustDraw: MustDraw?,
-    nextPlayers: List<Int>,
-  ): Turn {
-    val card = hand.firstOrNull {
-      validTurn(
-        card = it,
-        lastCard = lastCard,
-        color = color,
-        mustDraw = mustDraw,
-      )
-    }
-    return when(card) {
-      is UnoCard.Colored -> Turn.Play(card)
-      is UnoCard.Wildcard -> Turn.PlayWildcard(card, color)
-      else -> Turn.Draw
-    }
-  }
-}
-
 fun validTurn(
   card: UnoCard,
   mustDraw: MustDraw?,
@@ -606,6 +581,56 @@ data class HandStats(
   }
 }
 
+fun dominantColor(
+  cards: List<UnoCard>
+): UnoColor {
+   val count = buildMap {
+     UnoColor.entries.forEach { color ->
+       put(color, 0)
+     }
+   }.toMutableMap()
+   cards.forEach { card ->
+     if (card is UnoCard.Colored) {
+       count[card.color] = count[card.color]!! + 1
+     }
+   }
+   return count.maxBy { (_, c) -> c }.key
+}
+
+private fun Float.format(
+  decimalPlaces: Int = 2,
+): String {
+  return String.format("%.${decimalPlaces}f", this)
+}
+
+class DumbStrategy : Strategy {
+  override fun turn(
+    hand: List<UnoCard>,
+    lastCard: UnoCard,
+    rotation: Rotation,
+    color: UnoColor,
+    mustDraw: MustDraw?,
+    nextPlayers: List<Int>,
+  ): Turn {
+    val card = hand.firstOrNull {
+      validTurn(
+        card = it,
+        lastCard = lastCard,
+        color = color,
+        mustDraw = mustDraw,
+      )
+    }
+    return when(card) {
+      is UnoCard.Colored -> Turn.Play(card)
+      is UnoCard.Wildcard -> Turn.PlayWildcard(
+        card = card, 
+        newColor = dominantColor(hand)
+      )
+      else -> Turn.Draw
+    }
+  }
+}
+
 class RandomStrategy : Strategy {
   override fun turn(
     hand: List<UnoCard>,
@@ -632,28 +657,6 @@ class RandomStrategy : Strategy {
       else -> Turn.Draw
     }
   }
-}
-
-fun dominantColor(
-  cards: List<UnoCard>
-): UnoColor {
-   val count = buildMap {
-     UnoColor.entries.forEach { color ->
-       put(color, 0)
-     }
-   }.toMutableMap()
-   cards.forEach { card ->
-     if (card is UnoCard.Colored) {
-       count[card.color] = count[card.color]!! + 1
-     }
-   }
-   return count.maxBy { (_, c) -> c }.key
-}
-
-private fun Float.format(
-  decimalPlaces: Int = 2,
-): String {
-  return String.format("%.${decimalPlaces}f", this)
 }
 
 class LocalStrategy : Strategy {
