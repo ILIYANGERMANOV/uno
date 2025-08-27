@@ -430,6 +430,10 @@ fun simulate(
    var totalTurns = 0
    var winnerStats = HandStats()
    var losersStats = HandStats()
+   var winnerDraws = 0
+   var losersDraws = 0
+   var winnerWasFirst = 0
+   var lastWasLoser = 0
    repeat(games) {
      val players = (if (shufflePlayers) 
        ps.shuffled()
@@ -446,12 +450,24 @@ fun simulate(
       debug = debug,
      )
      val winner = game.play()
+     winnerWasFirst += 1.takeIf {
+       players.first().name == winner.name
+     } ?: 0
+     lastWasLoser += 1.takeIf {
+       players.last().name != winner.name
+     } ?: 0
      wins[winner.name] = wins[winner.name]!! + 1
+     winnerDraws += winner.history.count { 
+       it.second is Turn.Draw
+     }
      totalTurns += game.turns.size
      winnerStats += HandStats(winner.history[0].first)
      players.filter { it.name != winner.name }
        .forEach { loser ->
          losersStats += HandStats(loser.history[0].first)
+         losersDraws += loser.history.count {
+           it.second is Turn.Draw
+         }
        }
   }
   println(
@@ -470,6 +486,18 @@ fun simulate(
   println("Winner: $avgWinnerStats")
   val avgLoserStats = losersStats.divide(games).divide(ps.size - 1)
   println("Loser: $avgLoserStats")
+  println("Winner draws: ${winnerDraws / games}")
+  println("Loser draws: ${(losersDraws / games) / (ps.size - 1)}")
+  printGameStat("Winner was first", winnerWasFirst, games)
+  printGameStat("Last was loser", lastWasLoser, games)
+}
+
+private fun printGameStat(
+  label: String,
+  stat: Int,
+  games: Int,
+) {
+  println("$label: $stat games (${(stat.toFloat() / games).format()})")  
 }
 
 data class HandStats(
@@ -730,7 +758,7 @@ fun main() {
     ps = listOf(
       "dumb1" to DumbStrategy(),
       "local1" to LocalStrategy(),
-      "localTuz" to LocalStrategy(tuzThreshold = 5),
+      "localNoTuz" to LocalStrategy(tuzThreshold = 0),
       "random4" to RandomStrategy(),
     ),
     //games = 1,
