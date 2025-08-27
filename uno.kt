@@ -715,7 +715,11 @@ class LocalStrategy() : Strategy {
      // Tuzi
      if (nextPlayers.first() == 1) {
        priority = possible.filter {
-         it is UnoCard.Draw2 || it is UnoCard.Draw4
+         it is UnoCard.Draw2 
+           || it is UnoCard.Draw4 
+           || it is UnoCard.Skip
+           || it is UnoCard.ChangeColor
+           || it is UnoCard.Reverse
        }.firstOrNull()
      }
     
