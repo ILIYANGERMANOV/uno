@@ -1,0 +1,44 @@
+# .github/workflows/kotlin-ci.yml
+
+name: Kotlin Compile and Run CI
+
+# This workflow runs on every push to any branch
+on:
+  push:
+    branches: [ "**" ]
+  pull_request:
+    branches: [ "main" ]
+
+jobs:
+  build:
+    # Use the latest version of Ubuntu as the runner
+    runs-on: ubuntu-latest
+
+    steps:
+      # Step 1: Check out the repository code
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      # Step 2: Set up the Java Development Kit (JDK)
+      # Kotlin runs on the JVM, so a JDK is required.
+      - name: Set up JDK 17
+        uses: actions/setup-java@v4
+        with:
+          java-version: '17'
+          distribution: 'temurin'
+
+      # Step 3: Set up the Kotlin command-line compiler
+      - name: Set up Kotlin
+        uses: fwilhe2/setup-kotlin@v1.9.23
+
+      # Step 4: Compile the Kotlin code and run it
+      - name: Compile and Run Kotlin file
+        run: |
+          # This command compiles the Main.kt file into a self-contained JAR named "app.jar".
+          # -include-runtime: Bundles the Kotlin standard library into your JAR.
+          # -d: Specifies the output directory or .jar file.
+          kotlinc uno.kt -include-runtime -d app.jar
+          
+          # Execute the compiled JAR file
+          echo "Running the compiled Kotlin application..."
+          java -jar app.jar
