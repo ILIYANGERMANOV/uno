@@ -697,9 +697,9 @@ class LocalStrategy(
          it is UnoCard.Colored -> if (it.color == dominantColor)
            0 else 1
          it is UnoCard.Skip -> 2
+         it is UnoCard.ChangeColor -> 3
          it is UnoCard.Draw2 -> if (it.color == dominantColor) 
-           3 else 4
-         it is UnoCard.ChangeColor -> 5
+           4 else 5
          it is UnoCard.Draw4 -> 6
          else -> error("Incomplete LocalStrategy!")
        }
@@ -758,8 +758,8 @@ fun main() {
     ps = listOf(
       "dumb1" to DumbStrategy(),
       "local1" to LocalStrategy(),
-      "localNoTuz" to LocalStrategy(tuzThreshold = 0),
       "random4" to RandomStrategy(),
+      "localNoTuz" to LocalStrategy(tuzThreshold = 0),
     ),
     //games = 1,
     //shufflePlayers = false,
