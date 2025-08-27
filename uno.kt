@@ -696,9 +696,9 @@ class LocalStrategy() : Strategy {
            0 else 1
          it is UnoCard.Skip -> 2
          it is UnoCard.Reverse -> 3
+         it is UnoCard.ChangeColor -> 4
          it is UnoCard.Draw2 -> if (it.color == dominantColor) 
-           4 else 5
-         it is UnoCard.ChangeColor -> 6
+           5 else 6
          it is UnoCard.Draw4 -> 7
          else -> error("Incomplete LocalStrategy!")
        }
