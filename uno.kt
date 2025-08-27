@@ -418,7 +418,7 @@ fun validTurn(
 
 fun simulate(
  ps: List<Pair<String, Strategy>>,
- games: Int = 25_000,
+ games: Int = 250_000,
  shufflePlayers: Boolean = true,
  debug: Boolean = false,
 ) {
