@@ -695,6 +695,13 @@ class LocalStrategy : Strategy {
       }
     }
     
+    // Tuzi
+    if (nextPlayers.any { it == 1 }) {
+      priority = possible.filter {
+        it is UnoCard.Draw2 || it is UnoCard.Draw4
+      }.firstOrNull()
+    }
+    
     val candidate = priority ?: possible.firstOrNull() 
       ?: return Turn.Draw
     val canSkip = possible.none {
