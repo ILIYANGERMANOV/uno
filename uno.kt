@@ -673,9 +673,7 @@ class RandomStrategy : Strategy {
   }
 }
 
-class LocalStrategy(
-  private val tuzThreshold: Int = 1,
-) : Strategy {
+class LocalStrategy() : Strategy {
   override fun turn(
     hand: List<UnoCard>,
     lastCard: UnoCard,
@@ -715,7 +713,7 @@ class LocalStrategy(
      }
     
      // Tuzi
-     if (nextPlayers.any { it <= tuzThreshold }) {
+     if (nextPlayers.first() == 1) {
        priority = possible.filter {
          it is UnoCard.Draw2 || it is UnoCard.Draw4
        }.firstOrNull()
@@ -759,7 +757,7 @@ fun main() {
       "dumb1" to DumbStrategy(),
       "local1" to LocalStrategy(),
       "random4" to RandomStrategy(),
-      "localNoTuz" to LocalStrategy(tuzThreshold = 0),
+      "localNoTuz" to DumbStrategy(),
     ),
     //games = 1,
     //shufflePlayers = false,
