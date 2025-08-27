@@ -437,7 +437,7 @@ fun main() {
 
 fun simulate(
  ps: List<Pair<String, Strategy>>,
- games: Int = 30_000,
+ games: Int = 25_000,
  shufflePlayers: Boolean = true,
  debug: Boolean = false,
 ) {
@@ -653,15 +653,15 @@ class LocalStrategy : Strategy {
      )
     }.sortedBy {
       when {
+        it is UnoCard.Skip -> 0
         it is UnoCard.Number -> {
-          if (it.color == dominantColor) 0 else 1
+          if (it.color == dominantColor) 1 else 2
         }
-        it is UnoCard.Skip -> 2
         it is UnoCard.Colored -> if (it.color == dominantColor)
           3 else 4
+        it is UnoCard.ChangeColor -> 5
         it is UnoCard.Draw2 -> if (it.color == dominantColor) 
-          5 else 6
-        it is UnoCard.ChangeColor -> 7
+          6 else 7
         it is UnoCard.Draw4 -> 8
         else -> 4
       }
@@ -688,8 +688,8 @@ class LocalStrategy : Strategy {
       is UnoCard.Wildcard -> {
         val shouldPlay = !canSkip ||
           hand.all { 
-            it is UnoCard.Wildcard
-          }
+            it is UnoCard.Wildcard || it is UnoCard.Draw2
+          } || priority != null
         if (shouldPlay) {
           Turn.PlayWildcard(
             card = candidate,
