@@ -416,20 +416,6 @@ fun validTurn(
       }
 }
 
-fun main() {
-  simulate(
-    ps = listOf(
-      "dumb1" to DumbStrategy(),
-      "local" to LocalStrategy(),
-      "random3" to RandomStrategy(),
-      "random4" to RandomStrategy(),
-    ),
-    //games = 1,
-    //shufflePlayers = false,
-    //debug = true,
-  )
-}
-
 fun simulate(
  ps: List<Pair<String, Strategy>>,
  games: Int = 25_000,
@@ -659,80 +645,96 @@ class RandomStrategy : Strategy {
   }
 }
 
-class LocalStrategy : Strategy {
- override fun turn(
-   hand: List<UnoCard>,
-   lastCard: UnoCard,
-   rotation: Rotation,
-   color: UnoColor,
+class LocalStrategy(
+  private val tuzThreshold: Int = 1,
+) : Strategy {
+  override fun turn(
+    hand: List<UnoCard>,
+    lastCard: UnoCard,
+    rotation: Rotation,
+    color: UnoColor,
    mustDraw: MustDraw?,
-   nextPlayers: List<Int>,
- ): Turn {
-   val dominantColor = dominantColor(hand)
-   val possible = hand.filter {
-     validTurn(
-       card = it,
-       lastCard = lastCard,
-       color = color,
-       mustDraw = mustDraw,
-     )
-    }.sortedBy {
-      when {
-        it is UnoCard.Colored -> if (it.color == dominantColor)
-          0 else 1
-        it is UnoCard.Skip -> 2
-        it is UnoCard.Draw2 -> if (it.color == dominantColor) 
-          3 else 4
-        it is UnoCard.ChangeColor -> 5
-        it is UnoCard.Draw4 -> 6
-        else -> error("Incomplete LocalStrategy!")
-      }
-    }
+    nextPlayers: List<Int>,
+  ): Turn {
+    val dominantColor = dominantColor(hand)
+    val possible = hand.filter {
+      validTurn(
+        card = it,
+        lastCard = lastCard,
+        color = color,
+        mustDraw = mustDraw,
+      )
+     }.sortedBy {
+       when {
+         it is UnoCard.Colored -> if (it.color == dominantColor)
+           0 else 1
+         it is UnoCard.Skip -> 2
+         it is UnoCard.Draw2 -> if (it.color == dominantColor) 
+           3 else 4
+         it is UnoCard.ChangeColor -> 5
+         it is UnoCard.Draw4 -> 6
+         else -> error("Incomplete LocalStrategy!")
+       }
+     }
    
-    var priority: UnoCard? = null
+     var priority: UnoCard? = null
     
-    // Counter MustDraw
-    if (mustDraw != null) {
-      priority = possible.firstOrNull {
-        it is UnoCard.Draw2 || it is UnoCard.Draw4
-      }
-    }
+     // Counter MustDraw
+     if (mustDraw != null) {
+       priority = possible.firstOrNull {
+         it is UnoCard.Draw2 || it is UnoCard.Draw4
+       }
+     }
     
-    // Tuzi
-    if (nextPlayers.any { it == 1 }) {
-      priority = possible.filter {
-        it is UnoCard.Draw2 || it is UnoCard.Draw4
-      }.firstOrNull()
-    }
+     // Tuzi
+     if (nextPlayers.any { it <= tuzThreshold }) {
+       priority = possible.filter {
+         it is UnoCard.Draw2 || it is UnoCard.Draw4
+       }.firstOrNull()
+     }
     
-    val candidate = priority ?: possible.firstOrNull() 
-      ?: return Turn.Draw
-    val canSkip = possible.none {
-      it is UnoCard.Colored && it.color == color
-    }
-    return when(candidate) {
-      is UnoCard.Draw2 -> {
-        if (canSkip && priority == null) Turn.Draw else Turn.Play(candidate)
-      }
-      is UnoCard.Wildcard -> {
-        val shouldPlay = !canSkip ||
-          hand.all { 
-            it is UnoCard.Wildcard || it is UnoCard.Draw2
-          } || priority != null
-        if (shouldPlay) {
-          Turn.PlayWildcard(
-            card = candidate,
-            newColor = dominantColor,
-          )
-        } else Turn.Draw
-      }
-      else -> when(candidate) {
-        is UnoCard.Colored -> Turn.Play(candidate)
-        is UnoCard.Wildcard -> Turn.PlayWildcard(
-          card = candidate,
-          newColor = dominantColor,
-        )
-      }
-    }
-  } 
+     val candidate = priority ?: possible.firstOrNull() 
+       ?: return Turn.Draw
+     val canSkip = possible.none {
+       it is UnoCard.Colored && it.color == color
+     }
+     return when(candidate) {
+       is UnoCard.Draw2 -> {
+         if (canSkip && priority == null) Turn.Draw else Turn.Play(candidate)
+       }
+       is UnoCard.Wildcard -> {
+         val shouldPlay = !canSkip ||
+           hand.all { 
+             it is UnoCard.Wildcard || it is UnoCard.Draw2
+           } || priority != null
+         if (shouldPlay) {
+           Turn.PlayWildcard(
+             card = candidate,
+             newColor = dominantColor,
+           )
+         } else Turn.Draw
+       }
+       else -> when(candidate) {
+         is UnoCard.Colored -> Turn.Play(candidate)
+         is UnoCard.Wildcard -> Turn.PlayWildcard(
+           card = candidate,
+           newColor = dominantColor,
+         )
+       }
+     }
+   } 
+}
+
+fun main() {
+  simulate(
+    ps = listOf(
+      "dumb1" to DumbStrategy(),
+      "local1" to LocalStrategy(),
+      "localTuz" to LocalStrategy(tuzThreshold = 5),
+      "random4" to RandomStrategy(),
+    ),
+    //games = 1,
+    //shufflePlayers = false,
+    //debug = true,
+  )
 }
