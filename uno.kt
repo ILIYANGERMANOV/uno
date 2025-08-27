@@ -262,6 +262,7 @@ class UnoGame(
     repeat(7) {
       players.forEach(::giveCard)
     }
+    if (debug) println("First card: $firstCard")
   }
   
   fun play(): Player {
@@ -336,7 +337,8 @@ class UnoGame(
         "Cards invariant broken! Total cards = $totalCards"  
       }
       if (debug) {
-        println("${player.name} (${player.hand.size}): $turn deck(${deck.size})")
+        println("${player.name} (${player.hand.size}): $turn" +
+                "; hand: ${player.hand} deck: deck(${deck.size})")
       }
       nextTurn()
     }
@@ -427,8 +429,9 @@ fun main() {
       "random3" to RandomStrategy(),
       "random4" to RandomStrategy(),
     ),
-    //games = 1,
+    games = 1,
     //shufflePlayers = false,
+    debug = true,
   )
 }
 
@@ -436,6 +439,7 @@ fun simulate(
  ps: List<Pair<String, Strategy>>,
  games: Int = 30_000,
  shufflePlayers: Boolean = true,
+ debug: Boolean = false,
 ) {
    println("$games games, shuffled=$shufflePlayers")
    val wins = mutableMapOf<String, Int>()
@@ -458,6 +462,7 @@ fun simulate(
      }
      val game = UnoGame(
       players = players,
+      debug = debug,
      )
      val winner = game.play()
      wins[winner.name] = wins[winner.name]!! + 1
@@ -682,7 +687,7 @@ class LocalStrategy : Strategy {
       }
       is UnoCard.Wildcard -> {
         val shouldPlay = !canSkip ||
-          possible.all { 
+          hand.all { 
             it is UnoCard.Wildcard
           }
         if (shouldPlay) {
