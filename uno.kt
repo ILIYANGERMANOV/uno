@@ -423,7 +423,7 @@ fun main() {
   simulate(
     ps = listOf(
       "dumb1" to DumbStrategy(),
-      "dumb2" to DumbStrategy(),
+      "local" to LocalStrategy(),
       "random3" to RandomStrategy(),
       "random4" to RandomStrategy(),
     ),
@@ -662,11 +662,13 @@ class LocalStrategy : Strategy {
       }
     }
    
-    var priority = null
+    var priority: UnoCard? = null
     
     // Counter MustDraw
     if (mustDraw != null) {
-      // TODO
+      priority = possible.firstOrNull {
+        it is UnoCard.Draw2 || it is UnoCard.Draw4
+      }
     }
     
     val candidate = priority ?: possible.firstOrNull() 
@@ -676,7 +678,7 @@ class LocalStrategy : Strategy {
     }
     return when(candidate) {
       is UnoCard.Draw2 -> {
-        if (canSkip) Turn.Draw else Turn.Play(candidate)
+        if (canSkip && priority == null) Turn.Draw else Turn.Play(candidate)
       }
       is UnoCard.Wildcard -> {
         val shouldPlay = !canSkip ||
