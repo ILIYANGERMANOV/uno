@@ -692,12 +692,13 @@ class LocalStrategy() : Strategy {
       )
      }.sortedBy {
        when {
-         it is UnoCard.Colored -> if (it.color != color)
+         it is UnoCard.Skip || 
+         it is UnoCard.Reverse -> if (it.color == dominantColor)
            0 else 1
-         it is UnoCard.Skip -> 2
-         it is UnoCard.ChangeColor -> 3
-         it is UnoCard.Reverse -> 4
-         it is UnoCard.Draw2 -> if (it.color == color) 
+         it is UnoCard.Number -> if (it.color == dominantColor)
+           2 else 3
+         it is UnoCard.ChangeColor -> 4
+         it is UnoCard.Draw2 -> if (it.color == dominantColor) 
            5 else 6
          it is UnoCard.Draw4 -> 7
          else -> error("Incomplete LocalStrategy!")
