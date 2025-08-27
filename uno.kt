@@ -759,9 +759,9 @@ fun main() {
   simulate(
     ps = listOf(
       "dumb1" to DumbStrategy(),
-      "local" to LocalStrategy(),
-      "random4" to RandomStrategy(),
-      "dumb2" to DumbStrategy(),
+      "local1" to LocalStrategy(),
+      "random1" to RandomStrategy(),
+      "local2" to LocalStrategy(),
     ),
     //games = 1,
     //shufflePlayers = false,
