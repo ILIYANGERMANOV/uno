@@ -429,9 +429,9 @@ fun main() {
       "random3" to RandomStrategy(),
       "random4" to RandomStrategy(),
     ),
-    games = 1,
+    //games = 1,
     //shufflePlayers = false,
-    debug = true,
+    //debug = true,
   )
 }
 
@@ -651,7 +651,7 @@ class LocalStrategy : Strategy {
        color = color,
        mustDraw = mustDraw,
      )
-    }.sortedByDescending {
+    }.sortedBy {
       when {
         it is UnoCard.Number -> {
           if (it.color == dominantColor) 0 else 1
