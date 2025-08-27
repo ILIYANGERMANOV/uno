@@ -418,7 +418,7 @@ fun validTurn(
 
 fun simulate(
  ps: List<Pair<String, Strategy>>,
- games: Int = 250_000,
+ games: Int = 1_000_000,
  shufflePlayers: Boolean = true,
  debug: Boolean = false,
 ) {
@@ -760,8 +760,8 @@ class LocalStrategy() : Strategy {
 fun main() {
   simulate(
     ps = listOf(
-      "dumb1" to DumbStrategy(),
       "local1" to LocalStrategy(),
+      "dumb1" to DumbStrategy(),
       "random1" to RandomStrategy(),
       "local2" to LocalStrategy(),
     ),
