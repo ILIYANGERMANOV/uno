@@ -28,8 +28,12 @@ jobs:
           distribution: 'temurin'
 
       # Step 3: Set up the Kotlin command-line compiler
+      # FIX: Use a stable major version for the action (@v1)
+      # and specify the Kotlin version with the 'with' parameter.
       - name: Set up Kotlin
-        uses: fwilhe2/setup-kotlin@v1.9.23
+        uses: fwilhe2/setup-kotlin@v1
+        with:
+          version: '2.2.0'
 
       # Step 4: Compile the Kotlin code and run it
       - name: Compile and Run Kotlin file
@@ -37,6 +41,7 @@ jobs:
           # This command compiles the Main.kt file into a self-contained JAR named "app.jar".
           # -include-runtime: Bundles the Kotlin standard library into your JAR.
           # -d: Specifies the output directory or .jar file.
+          # IMPORTANT: Replace 'src/Main.kt' with the actual path to your Kotlin file.
           kotlinc uno.kt -include-runtime -d app.jar
           
           # Execute the compiled JAR file
