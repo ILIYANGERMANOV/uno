@@ -473,7 +473,7 @@ fun simulate(
   println(
     wins
       .map { (p, w) ->
-        w to "$p: $w wins (${(w.toFloat()/games).toString().take(5)})"
+        w to "$p: $w wins (${(w.toFloat()/games).format(5)})"
       }
       .sortedByDescending { (w, _) -> w }
       .map { (_, s) -> s }
