@@ -43,6 +43,11 @@ enum class UnoColor {
 }
 
 class UnoDeck(empty: Boolean = false) {
+  companion object {
+    const val CARDS_PER_COLOR = 25
+    const val CARDS_PER_NUMBER = 19
+  }
+  
   private var cards: List<UnoCard> = buildList {
     if (empty) return@buildList
       
@@ -813,7 +818,60 @@ class OptimalStrategy() : Strategy {
     colorsCount: Map<UnoColor, Int>,
     numbersCount: Map<Int, Int>,
   ): Turn {
-    TODO()
+    val dominantColor = dominantColor(hand)
+    val dominantNumber = dominantNumber(hand)
+    val possible = hand.filter {
+      validTurn(
+        card = it,
+        lastCard = lastCard,
+        color = color,
+        mustDraw = mustDraw,
+      )
+     }.sortedBy {
+       when {
+         it is UnoCard.Skip || 
+         it is UnoCard.Reverse -> if (it.color == dominantColor)
+           0 else 1
+         it is UnoCard.Number -> if (it.color == dominantColor) {
+           if (it.n == dominantNumber) 2 else 3
+         } else 4
+         it is UnoCard.ChangeColor -> 5
+         it is UnoCard.Draw2 -> if (it.color == dominantColor) 
+           6 else 7
+         it is UnoCard.Draw4 -> 8
+         else -> error("Incomplete LocalStrategy!")
+       }
+     }
+   
+     var priority: UnoCard? = null
+    
+     // Counter MustDraw
+     if (mustDraw != null) {
+       priority = possible.firstOrNull {
+         it is UnoCard.Draw2 || it is UnoCard.Draw4
+       }
+     }
+    
+     // Tuzi
+     if (nextPlayers.first() == 1) {
+       priority = possible.filter {
+         it is UnoCard.Draw2 
+           || it is UnoCard.Draw4 
+           || it is UnoCard.Skip
+           || it is UnoCard.ChangeColor
+           || it is UnoCard.Reverse
+       }.firstOrNull()
+     }
+    
+     val candidate = priority ?: possible.firstOrNull() 
+       ?: return Turn.Draw
+     return when(candidate) {
+       is UnoCard.Colored -> Turn.Play(candidate)
+       is UnoCard.Wildcard -> Turn.PlayWildcard(
+         card = candidate,
+         newColor = dominantColor,
+       )
+     }
   }
 }
 
