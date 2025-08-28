@@ -109,8 +109,8 @@ interface Strategy {
     mustDraw: MustDraw?,
     nextPlayers: List<Int>,
     cardHistory: List<UnoCard>,
-    numbersCount: Map<UnoColor, Int>,
-    colorsCount: Map<Int, Int>,
+    colorsCount: Map<UnoColor, Int>,
+    numbersCount: Map<Int, Int>,
   ): Turn
 }
 
@@ -132,8 +132,8 @@ class Player(
      mustDraw: MustDraw?,
      nextPlayers: List<Int>,
      cardHistory: List<UnoCard>,
-     numbersCount: Map<UnoColor, Int>,
-     colorsCount: Map<Int, Int>,
+     colorsCount: Map<UnoColor, Int>,
+     numbersCount: Map<Int, Int>,
    ): Turn {
      require(hand.isNotEmpty()) {
        "Cannot play with an empty hand!"
@@ -679,8 +679,8 @@ class DumbStrategy : Strategy {
     mustDraw: MustDraw?,
     nextPlayers: List<Int>,
     cardHistory: List<UnoCard>,
-    numbersCount: Map<UnoColor, Int>,
-    colorsCount: Map<Int, Int>,
+    colorsCount: Map<UnoColor, Int>,
+    numbersCount: Map<Int, Int>,
   ): Turn {
     val card = hand.firstOrNull {
       validTurn(
@@ -710,8 +710,8 @@ class RandomStrategy : Strategy {
     mustDraw: MustDraw?,
     nextPlayers: List<Int>,
     cardHistory: List<UnoCard>,
-    numbersCount: Map<UnoColor, Int>,
-    colorsCount: Map<Int, Int>,
+    colorsCount: Map<UnoColor, Int>,
+    numbersCount: Map<Int, Int>,
   ): Turn {
     val card = hand.filter {
       validTurn(
@@ -741,8 +741,8 @@ class LocalStrategy() : Strategy {
     mustDraw: MustDraw?,
     nextPlayers: List<Int>,
     cardHistory: List<UnoCard>,
-    numbersCount: Map<UnoColor, Int>,
-    colorsCount: Map<Int, Int>,
+    colorsCount: Map<UnoColor, Int>,
+    numbersCount: Map<Int, Int>,
   ): Turn {
     val dominantColor = dominantColor(hand)
     val dominantNumber = dominantNumber(hand)
