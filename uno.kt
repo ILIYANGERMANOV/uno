@@ -618,7 +618,7 @@ fun dominantNumber(
     for (n in 0..9) {
       put(n, 0)
     }
-  }
+  }.toMutableMap()
   cards.forEach { card ->
     if (card is UnoCard.Number) {
       count[card.n] = count[card.n]!! + 1
