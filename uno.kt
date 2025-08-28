@@ -464,9 +464,11 @@ fun simulate(
      winnerStats += HandStats(winner.history[0].first)
      players.filter { it.name != winner.name }
        .forEach { loser ->
-         losersStats += HandStats(loser.history[0].first)
-         losersDraws += loser.history.count {
-           it.second is Turn.Draw
+         if (loser.history.isNotEmpty()) {
+           losersStats += HandStats(loser.history[0].first)
+           losersDraws += loser.history.count {
+             it.second is Turn.Draw
+           }
          }
        }
   }
