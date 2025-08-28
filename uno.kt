@@ -315,7 +315,7 @@ class UnoGame(
            played.push(card)
            color = card.color
            _colorsCount[color] = _colorsCount[color]!! + 1
-           if card is UnoCard.Number) {
+           if (card is UnoCard.Number) {
              _numbersCount[card.n] = _numbersCount[card.n]!! + 1
            }
            if (card is UnoCard.Reverse) {
