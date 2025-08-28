@@ -611,6 +611,22 @@ fun dominantColor(
    return count.maxBy { (_, c) -> c }.key
 }
 
+fun dominantNumber(
+  cards: List<UnoCard>
+): Int {
+  val count = buildMap {
+    for (n in 0..9) {
+      put(n, 0)
+    }
+  }
+  locards.forEach { card ->
+    if (card is UnoCard.Number) {
+      count[card.n] = count[card.n]!! + 1
+    }
+  }
+  return count.maxBy { (_, c) -> c }.key
+}
+
 private fun Float.format(
   decimalPlaces: Int = 2,
 ): String {
@@ -683,6 +699,7 @@ class LocalStrategy() : Strategy {
     nextPlayers: List<Int>,
   ): Turn {
     val dominantColor = dominantColor(hand)
+    val dominantNumber = dominantNumber(hand)
     val possible = hand.filter {
       validTurn(
         card = it,
@@ -695,12 +712,13 @@ class LocalStrategy() : Strategy {
          it is UnoCard.Skip || 
          it is UnoCard.Reverse -> if (it.color == dominantColor)
            0 else 1
-         it is UnoCard.Number -> if (it.color == dominantColor)
-           2 else 3
-         it is UnoCard.ChangeColor -> 4
+         it is UnoCard.Number -> if (it.color == dominantColor) {
+           if (it.n == dominantNumber) 2 else 3
+         } else 4
+         it is UnoCard.ChangeColor -> 5
          it is UnoCard.Draw2 -> if (it.color == dominantColor) 
-           5 else 6
-         it is UnoCard.Draw4 -> 7
+           6 else 7
+         it is UnoCard.Draw4 -> 8
          else -> error("Incomplete LocalStrategy!")
        }
      }
