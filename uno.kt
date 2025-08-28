@@ -801,6 +801,22 @@ class LocalStrategy() : Strategy {
    } 
 }
 
+class OptimalStrategy() : Strategy {
+  override fun turn(
+    hand: List<UnoCard>,
+    lastCard: UnoCard,
+    rotation: Rotation,
+    color: UnoColor,
+    mustDraw: MustDraw?,
+    nextPlayers: List<Int>,
+    cardHistory: List<UnoCard>,
+    colorsCount: Map<UnoColor, Int>,
+    numbersCount: Map<Int, Int>,
+  ): Turn {
+    TODO()
+  }
+}
+
 fun main() {
   simulate(
     ps = listOf(
