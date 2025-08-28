@@ -747,24 +747,16 @@ class LocalStrategy() : Strategy {
     
      val candidate = priority ?: possible.firstOrNull() 
        ?: return Turn.Draw
-     val canSkip = possible.none {
-       it is UnoCard.Colored && it.color == color
-     }
      return when(candidate) {
        is UnoCard.Draw2 -> {
-         if (canSkip && priority == null) Turn.Draw else Turn.Play(candidate)
+         Turn.Play(candidate)
        }
        is UnoCard.Wildcard -> {
-         val shouldPlay = !canSkip ||
-           hand.all { 
-             it is UnoCard.Wildcard || it is UnoCard.Draw2
-           } || priority != null
-         if (shouldPlay) {
-           Turn.PlayWildcard(
-             card = candidate,
-             newColor = dominantColor,
-           )
-         } else Turn.Draw
+         Turn.PlayWildcard(
+           card = candidate,
+           newColor = dominantColor,
+        )
+         
        }
        else -> when(candidate) {
          is UnoCard.Colored -> Turn.Play(candidate)
