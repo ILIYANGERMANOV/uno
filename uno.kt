@@ -108,7 +108,7 @@ interface Strategy {
     color: UnoColor,
     mustDraw: MustDraw?,
     nextPlayers: List<Int>,
-    history: List<Pair<List<UnoCard>, Turn>>,
+    cardHistory: List<UnoCard>,
   ): Turn
 }
 
@@ -129,18 +129,19 @@ class Player(
      color: UnoColor,
      mustDraw: MustDraw?,
      nextPlayers: List<Int>,
-     history: List<Pair<List<UnoCard>, Turn>>,
+     cardHistory: List<UnoCard>,
    ): Turn {
      require(hand.isNotEmpty()) {
        "Cannot play with an empty hand!"
      }
      val turn = strategy.turn(
-         hand = hand,
-         lastCard = lastCard,
-         rotation = rotation,
-         color = color,
-         mustDraw = mustDraw,
-         nextPlayers = nextPlayers,
+       hand = hand,
+       lastCard = lastCard,
+       rotation = rotation,
+       color = color,
+       mustDraw = mustDraw,
+       nextPlayers = nextPlayers,
+       cardHistory = cardHistory, 
      )
      when(turn) {
        is Turn.Play -> {
@@ -251,6 +252,8 @@ class UnoGame(
   // History
   private val _turns = mutableListOf<Pair<String, Turn>>()
   val turns: List<Pair<String, Turn>> = _turns
+  private val _cardHistory = mutableListOf<UnoCard>()
+  private val cardHistory: List<UnoCard> = _cardHistory
   //private val initialDeck = deck.snapshot()
   
   init {
@@ -279,11 +282,12 @@ class UnoGame(
         color = color,
         mustDraw = mustDraw,
         nextPlayers = nextPlayers(),
-        history = history,
+        cardHistory = cardHistory,
       )
       when(turn) {
         is Turn.Play -> {
            val card = turn.card
+           _cardHistory.add(card)
            player.play(card)
            played.push(card)
            color = card.color
@@ -304,6 +308,7 @@ class UnoGame(
         }
         is Turn.PlayWildcard -> {
            val card = turn.card
+           _cardHistory.add(card)
            player.play(card)
            played.push(card)
            color = turn.newColor
@@ -646,7 +651,7 @@ class DumbStrategy : Strategy {
     color: UnoColor,
     mustDraw: MustDraw?,
     nextPlayers: List<Int>,
-    history: List<Pair<List<UnoCard>, Turn>>,
+    cardHistory: List<UnoCard>,
   ): Turn {
     val card = hand.firstOrNull {
       validTurn(
@@ -675,7 +680,7 @@ class RandomStrategy : Strategy {
     color: UnoColor,
     mustDraw: MustDraw?,
     nextPlayers: List<Int>,
-    history: List<Pair<List<UnoCard>, Turn>>,
+    cardHistory: List<UnoCard>,
   ): Turn {
     val card = hand.filter {
       validTurn(
@@ -704,7 +709,7 @@ class LocalStrategy() : Strategy {
     color: UnoColor,
     mustDraw: MustDraw?,
     nextPlayers: List<Int>,
-    history: List<Pair<List<UnoCard>, Turn>>,
+    cardHistory: List<UnoCard>,
   ): Turn {
     val dominantColor = dominantColor(hand)
     val dominantNumber = dominantNumber(hand)
