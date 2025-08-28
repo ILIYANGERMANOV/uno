@@ -619,7 +619,7 @@ fun dominantNumber(
       put(n, 0)
     }
   }
-  locards.forEach { card ->
+  cards.forEach { card ->
     if (card is UnoCard.Number) {
       count[card.n] = count[card.n]!! + 1
     }
