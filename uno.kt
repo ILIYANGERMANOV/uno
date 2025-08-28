@@ -108,6 +108,7 @@ interface Strategy {
     color: UnoColor,
     mustDraw: MustDraw?,
     nextPlayers: List<Int>,
+    history: List<Pair<List<UnoCard>, Turn>>,
   ): Turn
 }
 
@@ -128,6 +129,7 @@ class Player(
      color: UnoColor,
      mustDraw: MustDraw?,
      nextPlayers: List<Int>,
+     history: List<Pair<List<UnoCard>, Turn>>,
    ): Turn {
      require(hand.isNotEmpty()) {
        "Cannot play with an empty hand!"
@@ -277,6 +279,7 @@ class UnoGame(
         color = color,
         mustDraw = mustDraw,
         nextPlayers = nextPlayers(),
+        history = history,
       )
       when(turn) {
         is Turn.Play -> {
@@ -643,6 +646,7 @@ class DumbStrategy : Strategy {
     color: UnoColor,
     mustDraw: MustDraw?,
     nextPlayers: List<Int>,
+    history: List<Pair<List<UnoCard>, Turn>>,
   ): Turn {
     val card = hand.firstOrNull {
       validTurn(
@@ -671,6 +675,7 @@ class RandomStrategy : Strategy {
     color: UnoColor,
     mustDraw: MustDraw?,
     nextPlayers: List<Int>,
+    history: List<Pair<List<UnoCard>, Turn>>,
   ): Turn {
     val card = hand.filter {
       validTurn(
@@ -697,8 +702,9 @@ class LocalStrategy() : Strategy {
     lastCard: UnoCard,
     rotation: Rotation,
     color: UnoColor,
-   mustDraw: MustDraw?,
+    mustDraw: MustDraw?,
     nextPlayers: List<Int>,
+    history: List<Pair<List<UnoCard>, Turn>>,
   ): Turn {
     val dominantColor = dominantColor(hand)
     val dominantNumber = dominantNumber(hand)
