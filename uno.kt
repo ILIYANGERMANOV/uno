@@ -109,6 +109,8 @@ interface Strategy {
     mustDraw: MustDraw?,
     nextPlayers: List<Int>,
     cardHistory: List<UnoCard>,
+    numbersCount: Map<UnoColor, Int>,
+    colorsCount: Map<Int, Int>,
   ): Turn
 }
 
@@ -130,6 +132,8 @@ class Player(
      mustDraw: MustDraw?,
      nextPlayers: List<Int>,
      cardHistory: List<UnoCard>,
+     numbersCount: Map<UnoColor, Int>,
+     colorsCount: Map<Int, Int>,
    ): Turn {
      require(hand.isNotEmpty()) {
        "Cannot play with an empty hand!"
@@ -142,6 +146,8 @@ class Player(
        mustDraw = mustDraw,
        nextPlayers = nextPlayers,
        cardHistory = cardHistory, 
+       numbersCount = numbersCount,
+       colorsCount = colorsCount,
      )
      when(turn) {
        is Turn.Play -> {
@@ -254,7 +260,18 @@ class UnoGame(
   val turns: List<Pair<String, Turn>> = _turns
   private val _cardHistory = mutableListOf<UnoCard>()
   private val cardHistory: List<UnoCard> = _cardHistory
-  //private val initialDeck = deck.snapshot()
+  private val _colorsCount = buildMap {
+    UnoColor.entries.forEach { color ->
+      put(color, 0)
+    }
+  }.toMutableMap()
+  val colorsCount: Map<UnoColor, Int> = _colorsCount
+  private val _numbersCount = buildMap {
+    for (n in 0..9) {
+      put(n, 0)
+    }
+  }.toMutableMap()
+  val numbersCount: Map<Int, Int> = _numbersCount
   
   init {
     require(players.size == 4) {
@@ -267,6 +284,10 @@ class UnoGame(
     }
     played.push(firstCard)
     color = firstCard.color
+    _colorsCount[color] = _colorsCount[color]!! + 1
+    if (firstCard is UnoCard.Number) {
+      _numbersCount[firstCard.n] = _numbersCount[firstCard.n]!! + 1
+    }
     repeat(7) {
       players.forEach(::giveCard)
     }
@@ -283,6 +304,8 @@ class UnoGame(
         mustDraw = mustDraw,
         nextPlayers = nextPlayers(),
         cardHistory = cardHistory,
+        colorsCount = colorsCount,
+        numbersCount = numbersCount,
       )
       when(turn) {
         is Turn.Play -> {
@@ -291,6 +314,10 @@ class UnoGame(
            player.play(card)
            played.push(card)
            color = card.color
+           _colorsCount[color] = _colorsCount[color]!! + 1
+           if card is UnoCard.Number) {
+             _numbersCount[card.n] = _numbersCount[card.n]!! + 1
+           }
            if (card is UnoCard.Reverse) {
              reverse()  
            }
@@ -652,6 +679,8 @@ class DumbStrategy : Strategy {
     mustDraw: MustDraw?,
     nextPlayers: List<Int>,
     cardHistory: List<UnoCard>,
+    numbersCount: Map<UnoColor, Int>,
+    colorsCount: Map<Int, Int>,
   ): Turn {
     val card = hand.firstOrNull {
       validTurn(
@@ -681,6 +710,8 @@ class RandomStrategy : Strategy {
     mustDraw: MustDraw?,
     nextPlayers: List<Int>,
     cardHistory: List<UnoCard>,
+    numbersCount: Map<UnoColor, Int>,
+    colorsCount: Map<Int, Int>,
   ): Turn {
     val card = hand.filter {
       validTurn(
@@ -710,6 +741,8 @@ class LocalStrategy() : Strategy {
     mustDraw: MustDraw?,
     nextPlayers: List<Int>,
     cardHistory: List<UnoCard>,
+    numbersCount: Map<UnoColor, Int>,
+    colorsCount: Map<Int, Int>,
   ): Turn {
     val dominantColor = dominantColor(hand)
     val dominantNumber = dominantNumber(hand)
